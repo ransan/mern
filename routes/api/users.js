@@ -6,10 +6,16 @@ const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
 const passport = require('passport');
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
 
 routes.get("/test", (req, res) => res.json({ msg: "users working" }));
 
 routes.post('/register', (req, res) => {
+  const{error, isValid} = validateRegisterInput(req.body);
+  if(!isValid){
+    res.status(400).json(error);
+  }
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
       errors.email = 'Email already exists';
@@ -43,6 +49,11 @@ routes.post('/register', (req, res) => {
 });
 
 routes.post('/login', (req,res) => {
+  const{error, isValid} = validateLoginInput(req.body);
+  if(!isValid){
+    res.status(400).json(error);
+  }
+
   const email = req.body.email;
   const  password = req.body.password;
   User.findOne({email}).then(user => {
